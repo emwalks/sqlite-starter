@@ -45,6 +45,8 @@ destroyPart1Database()
  `mkdir -p ~/Documents/Shared\ Playground\ Data/SQLiteTutorial`
  
  */
+
+//: ## Open a Connection
 func openDatabase() -> OpaquePointer? {
     var db: OpaquePointer? = nil
     //the & is an in-out parameter: passes value by reference rather than value
@@ -60,9 +62,6 @@ func openDatabase() -> OpaquePointer? {
 }
 
 let db = openDatabase()
-
-//: ## Open a Connection
-
 //: ## Create a Table
 
 //: ## Insert a Contact
