@@ -95,34 +95,67 @@ createTable()
 // The ? syntax tells the compiler that you’ll provide real values when you actually execute the statement
 let insertStatementString = "INSERT INTO Contact (Id, Name) VALUES (?, ?);"
 
-func insert() {
+//func insert() {
+//    var insertStatement: OpaquePointer? = nil
+//
+//    // compile the statement and verify that all is well
+//    if sqlite3_prepare_v2(db, insertStatementString, -1, &insertStatement, nil) == SQLITE_OK {
+//        let id: Int32 = 1
+//        let name: NSString = "Ray"
+//
+//        // Here, you define a value for the ? placeholder. The function’s name — sqlite3_bind_int() — implies you’re binding an Int value to the statement. The first parameter of the function is the statement to bind to, while the second is a non-zero based index for the position of the ? you’re binding to. The third and final parameter is the value itself. This binding call returns a status code, but for now you assume that it succeeds;
+//        sqlite3_bind_int(insertStatement, 1, id)
+//
+//        // Perform the same binding process, but this time for a text value. There are two additional parameters on this call; for the purposes of this tutorial you can simply pass -1 and nil for them.
+//        sqlite3_bind_text(insertStatement, 2, name.utf8String, -1, nil)
+//
+//        // Use the sqlite3_step() function to execute the statement and verify that it finished
+//        if sqlite3_step(insertStatement) == SQLITE_DONE {
+//            print("Successfully inserted row.")
+//        } else {
+//            print("Could not insert row.")
+//        }
+//    } else {
+//        print("INSERT statement could not be prepared.")
+//    }
+//    // finalize the statement. If you were going to insert multiple contacts, you’d likely retain the statement and re-use it with different values.
+//    sqlite3_finalize(insertStatement)
+//}
+//
+//insert()
+
+//refactored 90-127 to insert multiple
+
+func insertMultipleStatements() {
+    
     var insertStatement: OpaquePointer? = nil
+    
+    let names: [NSString] = ["Ray", "Emma", "Andrew", "Chris"]
     
     // compile the statement and verify that all is well
     if sqlite3_prepare_v2(db, insertStatementString, -1, &insertStatement, nil) == SQLITE_OK {
-        let id: Int32 = 1
-        let name: NSString = "Ray"
         
-        // Here, you define a value for the ? placeholder. The function’s name — sqlite3_bind_int() — implies you’re binding an Int value to the statement. The first parameter of the function is the statement to bind to, while the second is a non-zero based index for the position of the ? you’re binding to. The third and final parameter is the value itself. This binding call returns a status code, but for now you assume that it succeeds;
-        sqlite3_bind_int(insertStatement, 1, id)
-        
-        // Perform the same binding process, but this time for a text value. There are two additional parameters on this call; for the purposes of this tutorial you can simply pass -1 and nil for them.
-        sqlite3_bind_text(insertStatement, 2, name.utf8String, -1, nil)
-        
-        // Use the sqlite3_step() function to execute the statement and verify that it finished
-        if sqlite3_step(insertStatement) == SQLITE_DONE {
-            print("Successfully inserted row.")
-        } else {
-            print("Could not insert row.")
+        for (index, name) in names.enumerated() {
+            let id = Int32(index + 1)
+            sqlite3_bind_int(insertStatement, 1, id)
+            sqlite3_bind_text(insertStatement, 2, name.utf8String, -1, nil)
+            
+            if sqlite3_step(insertStatement) == SQLITE_DONE {
+                print("Successfully inserted row.")
+            } else {
+                print("Could not insert row.")
+            }
+            sqlite3_reset(insertStatement)
         }
+        
+        sqlite3_finalize(insertStatement)
+        
     } else {
         print("INSERT statement could not be prepared.")
     }
-    // finalize the statement. If you were going to insert multiple contacts, you’d likely retain the statement and re-use it with different values.
-    sqlite3_finalize(insertStatement)
 }
 
-insert()
+insertMultipleStatements()
 //: ## Querying
 
 //: ## Update
