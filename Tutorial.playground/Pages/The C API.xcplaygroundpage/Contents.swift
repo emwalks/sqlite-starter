@@ -63,9 +63,66 @@ func openDatabase() -> OpaquePointer? {
 
 let db = openDatabase()
 //: ## Create a Table
+let createTableString = """
+CREATE TABLE Contact(
+Id INT PRIMARY KEY NOT NULL,
+Name CHAR(255));
+"""
 
+func createTable() {
+    // creates a pointer to reference
+    var createTableStatement: OpaquePointer? = nil
+    
+    //compiles the SQL statement into byte code and returns a status code
+    if sqlite3_prepare_v2(db, createTableString, -1, &createTableStatement, nil) == SQLITE_OK {
+        
+        // runs the compiled statement. In this case, you only “step” once as this statement has a single result
+        if sqlite3_step(createTableStatement) == SQLITE_DONE {
+            print("Contact table created.")
+        } else {
+            print("Contact table could not be created.")
+        }
+    } else {
+        print("CREATE TABLE statement could not be prepared.")
+    }
+    
+    // You must always call sqlite3_finalize() on your compiled statement to delete it and avoid resource leaks
+    sqlite3_finalize(createTableStatement)
+}
+
+createTable()
 //: ## Insert a Contact
+// The ? syntax tells the compiler that you’ll provide real values when you actually execute the statement
+let insertStatementString = "INSERT INTO Contact (Id, Name) VALUES (?, ?);"
 
+func insert() {
+    var insertStatement: OpaquePointer? = nil
+    
+    // compile the statement and verify that all is well
+    if sqlite3_prepare_v2(db, insertStatementString, -1, &insertStatement, nil) == SQLITE_OK {
+        let id: Int32 = 1
+        let name: NSString = "Ray"
+        
+        // Here, you define a value for the ? placeholder. The function’s name — sqlite3_bind_int() — implies you’re binding an Int value to the statement. The first parameter of the function is the statement to bind to, while the second is a non-zero based index for the position of the ? you’re binding to. The third and final parameter is the value itself. This binding call returns a status code, but for now you assume that it succeeds;
+        sqlite3_bind_int(insertStatement, 1, id)
+        
+        // Perform the same binding process, but this time for a text value. There are two additional parameters on this call; for the purposes of this tutorial you can simply pass -1 and nil for them.
+        sqlite3_bind_text(insertStatement, 2, name.utf8String, -1, nil)
+        
+        // Use the sqlite3_step() function to execute the statement and verify that it finished
+        if sqlite3_step(insertStatement) == SQLITE_DONE {
+            print("Successfully inserted row.")
+        } else {
+            print("Could not insert row.")
+        }
+    } else {
+        print("INSERT statement could not be prepared.")
+    }
+    // finalize the statement. If you were going to insert multiple contacts, you’d likely retain the statement and re-use it with different values.
+    sqlite3_finalize(insertStatement)
+}
+
+insert()
 //: ## Querying
 
 //: ## Update
