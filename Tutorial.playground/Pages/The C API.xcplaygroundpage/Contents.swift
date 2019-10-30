@@ -157,6 +157,39 @@ func insertMultipleStatements() {
 
 insertMultipleStatements()
 //: ## Querying
+let queryStatementString = "SELECT * FROM Contact;"
+func query() {
+    var queryStatement: OpaquePointer? = nil
+    // prepares the statement
+    if sqlite3_prepare_v2(db, queryStatementString, -1, &queryStatement, nil) == SQLITE_OK {
+        
+        // checks the query status code: SQLITE_ROW means that you retrieved a row when you stepped through the result;
+        while (sqlite3_step(queryStatement) == SQLITE_ROW) {
+            
+            // you can access the row’s values column by column. The first column is an Int, so you use sqlite3_column_int() and pass in the statement and a zero-based column index. You assign the returned value to the locally-scoped id constant
+            let id = sqlite3_column_int(queryStatement, 0)
+            
+            //fetch the text value from the Name column. This is a bit messy due to the C API. First, you capture the value as queryResultCol1 so you can convert it to a proper Swift string on the next line
+            let queryResultCol1 = sqlite3_column_text(queryStatement, 1)
+            let name = String(cString: queryResultCol1!)
+            
+            // prints result
+            print("Query Result:")
+            print("\(id) | \(name)")
+            
+//        } else {
+//            print("Query returned no results")
+        }
+    } else {
+        print("SELECT statement could not be prepared")
+    }
+    
+    // finalize as above
+    sqlite3_finalize(queryStatement)
+}
+
+query()
+
 
 //: ## Update
 
